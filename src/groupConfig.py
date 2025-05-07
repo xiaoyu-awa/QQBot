@@ -36,9 +36,12 @@ class GroupConfig:
         }
     }
 
-    def __init__(self, yaml_config: YAMLConfig):
+    def __init__(self, yaml_config: YAMLConfig, group_id : str):
         self.config = yaml_config
         self.config_map = ConfigItem.getConfigMap()
+        self.group_id = str(group_id)
+        if self.config.get(str(group_id)) is None:
+            self.initConfig()
 
 
     def getConfigItem(self, enum_item: ConfigItem) -> Dict[str, Any]:
@@ -54,17 +57,20 @@ class GroupConfig:
         """列举所有可用配置项"""
         return {item: self.getConfigItem(item) for item in ConfigItem}
 
-    def getConfigByEnum(self, group_id: Union[str, int], enum_item: ConfigItem) -> Any:
+    def getConfigByEnum(self, enum_item: ConfigItem) -> Any:
         """通过枚举获取配置项"""
-        group_id = str(group_id)
-        return self.config.get(group_id + "." + enum_item.key, None)
+        group_id = str(self.group_id)
+        return self.config.get(self.group_id + "." + enum_item.key, None)
 
-    def setConfigByEnum(self, group_id: Union[str, int], enum_item: ConfigItem, value: Any, auto_save: bool = True) -> None:
+    def setConfigByEnum(self, enum_item: ConfigItem, value: Any, auto_save: bool = True) -> None:
         """通过枚举设置配置项"""
-        group_id = str(group_id)
+        group_id = str(self.group_id)
 
-        self.config.set(f"{group_id}.{enum_item.key}", value)
+        self.config.set(f"{self.group_id}.{enum_item.key}", value)
         if auto_save:
             self.config.save()
 
-groupSettings = GroupConfig(configUtils.config)
+    def initConfig(self):
+        for key, value in self.CONFIG_SCHEMA.items():
+            self.config.set(f"{self.group_id}.{key}", value["default"])
+            self.config.save()

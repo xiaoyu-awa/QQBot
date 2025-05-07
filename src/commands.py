@@ -3,11 +3,11 @@ from typing import Dict, List, Tuple, Callable
 
 from ncatbot.core import GroupMessage
 
-from . import messageUtils, configUtils
+from . import messageUtils, configUtils, groupConfig
 from . import picHandle
 from . import utils
+from .groupConfig import GroupConfig, ConfigItem
 from .utils import isAdmin
-from .groupConfig import groupSettings, ConfigItem
 from .configUtils import config, sensitive_word
 
 
@@ -112,7 +112,8 @@ async def menu(message: GroupMessage):
 
 @command(name="#随机图片")
 async def randomPic(message: GroupMessage):
-    if not configUtils.config.get(str(message.group_id) + ".randomPic", False):
+    groupSettings = GroupConfig(config,message.group_id)
+    if not groupSettings.getConfigByEnum(groupSettings.config_map[ConfigItem.RANDOMPIC.key]):
         await messageUtils.sendMessage(message, "功能已禁用")
         return
     await messageUtils.replyWebPicMessage(message, "", "https://www.loliapi.com/acg/index.php")
@@ -159,8 +160,9 @@ async def mute(message: GroupMessage):
 @admin
 async def showGroupSettings(message: GroupMessage):
     s = ""
+    groupSettings = GroupConfig(config,message.group_id)
     for i in groupSettings.listAllConfigItems().keys():
-        s += i.cn_name + ": " + str(groupSettings.getConfigByEnum(message.group_id, groupSettings.config_map[i.key])) + "\n"
+        s += i.cn_name + ": " + str(groupSettings.getConfigByEnum(groupSettings.config_map[i.key])) + "\n"
     await messageUtils.replyMessage(message, s)
     return
 
@@ -168,12 +170,13 @@ async def showGroupSettings(message: GroupMessage):
 @command(name="#关键词屏蔽")
 @admin
 async def showGroupSettings(message: GroupMessage):
-    if not groupSettings.getConfigByEnum(message.group_id, groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key]):
-        groupSettings.setConfigByEnum(message.group_id, groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key], True)
+    groupSettings = GroupConfig(config,message.group_id)
+    if not groupSettings.getConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key]):
+        groupSettings.setConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key], True)
         await reloadSettings(message)
         await messageUtils.replyMessage(message, "关键词屏蔽:开")
     else:
-        groupSettings.setConfigByEnum(message.group_id, groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key], False)
+        groupSettings.setConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key], False)
         await reloadSettings(message)
         await messageUtils.replyMessage(message, "关键词屏蔽:关")
     return
