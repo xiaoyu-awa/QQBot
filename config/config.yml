@@ -1,7 +1,7 @@
 '679198724':
   randomPic: true
   keyWordMute: true
-  keyWords: []
+  keyWords: ["[\\u1800-\\u18af]"]
 '701892368':
   randomPic: false
   keyWordMute: true
