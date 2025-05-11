@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Any, Union
+from typing import Dict, Any
 
 from .configUtils import YAMLConfig
 
@@ -35,8 +35,8 @@ class GroupConfig:
         }
     }
 
-    def __init__(self, yaml_config: YAMLConfig, group_id : str):
-        self.config = yaml_config
+    def __init__(self, group_id : str):
+        self.config = YAMLConfig('config/config.yml')
         self.config_map = GroupConfigItem.getConfigMap()
         self.group_id = str(group_id)
 

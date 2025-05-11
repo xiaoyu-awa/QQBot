@@ -1,3 +1,4 @@
+import datetime
 from functools import wraps
 from typing import Dict, List, Tuple, Callable
 
@@ -7,8 +8,9 @@ from . import messageUtils
 from . import picHandle
 from . import utils
 from .config.groupConfig import GroupConfig, GroupConfigItem
+from .config.userConfig import UserConfig, UserConfigItem
 from .utils import isAdmin
-from .config.configUtils import config, sensitive_word
+from .config.configUtils import sensitive_word
 
 
 class Command:
@@ -21,6 +23,8 @@ class Command:
     @classmethod
     def execute(cls, msg: GroupMessage):
         raise NotImplementedError
+
+
 class CommandSystem:
     @staticmethod
     def parse_input(msg: GroupMessage) -> Tuple[str, GroupMessage]:
@@ -40,6 +44,8 @@ class CommandSystem:
             await handler(msg)
         else:
             return
+
+
 def command(name: str = None):
     def decorator(func: Callable):
         cmd_name = name or func.__name__
@@ -55,6 +61,8 @@ def command(name: str = None):
         return wrapper
 
     return decorator
+
+
 def admin(func: Callable):
     @wraps(func)
     async def wrapper(message: GroupMessage, *args, **kwargs):
@@ -65,6 +73,7 @@ def admin(func: Callable):
 
     return wrapper
 
+
 async def handle(message: GroupMessage):
     cmd_name, msg = CommandSystem.parse_input(message)
     await CommandSystem.handle_command(cmd_name, msg)
@@ -72,6 +81,41 @@ async def handle(message: GroupMessage):
 
 """
 画个分界线好看x=========================================================================================
+"""
+
+
+@command(name="#菜单")
+async def menu(message: GroupMessage):
+    await messageUtils.replyMessage(message, "菜单:\n")
+    return
+
+
+@command(name="#签到")
+async def signIn(message: GroupMessage):
+    uc = UserConfig(message.user_id)
+    timeStamp = uc.getConfigByEnum(uc.config_map[UserConfigItem.SIGNINTIME.key])
+
+    if uc == 0:
+        last = "还没有签到过"
+    else:
+        last = datetime.datetime.fromtimestamp(timeStamp).strftime("%Y-%m-%d %H:%M:%S")
+
+    date1 = datetime.date.today()
+    date2 = datetime.date.fromtimestamp(timeStamp)
+    delta = date1 - date2
+    days = delta.days
+    if not (days >= 1):
+        await messageUtils.replyMessage(message, "今天已经签到过了\n上次签到时间：" + last)
+        return
+
+    uc.setConfigByEnum(uc.config_map[UserConfigItem.SIGNINTIME.key], datetime.datetime.now().timestamp())
+    await messageUtils.replyMessage(message, "签到成功!")
+
+    return
+
+
+"""
+小功能   画个分界线好看x=========================================================================================
 """
 
 
@@ -105,14 +149,10 @@ async def getMCServerStatus(message: GroupMessage):
         await messageUtils.sendLocalPicMessage(message, players, "pic/temp/mcServerInfo.png")
     return
 
-@command(name="#菜单")
-async def menu(message: GroupMessage):
-    await messageUtils.replyMessage(message, "菜单:\n")
-    return
 
 @command(name="#随机图片")
 async def randomPic(message: GroupMessage):
-    groupSettings = GroupConfig(config, message.group_id)
+    groupSettings = GroupConfig(message.group_id)
     if not groupSettings.getConfigByEnum(groupSettings.config_map[GroupConfigItem.RANDOMPIC.key]):
         await messageUtils.sendMessage(message, "功能已禁用")
         return
@@ -121,8 +161,8 @@ async def randomPic(message: GroupMessage):
     if len(message.raw_message.split()) == 2:
         if str(message.raw_message.split()[1]).isdigit():
             msg = MessageChain([])
-            for i in range(max(1,min(int(message.raw_message.split()[1]), 5))):
-                msg+=Image("https://www.loliapi.com/acg/index.php")
+            for i in range(max(1, min(int(message.raw_message.split()[1]), 5))):
+                msg += Image("https://www.loliapi.com/acg/index.php")
             await message.api.post_group_msg(group_id=message.group_id, rtf=msg)
         else:
             await messageUtils.sendMessage(message, "请输入正确的命令格式，例如：#随机图片 {数量(1-5)}")
@@ -171,7 +211,7 @@ async def mute(message: GroupMessage):
 @admin
 async def showGroupSettings(message: GroupMessage):
     s = ""
-    groupSettings = GroupConfig(config,message.group_id)
+    groupSettings = GroupConfig(message.group_id)
     for i in groupSettings.listAllConfigItems().keys():
         s += i.cn_name + ": " + str(groupSettings.getConfigByEnum(groupSettings.config_map[i.key])) + "\n"
     await messageUtils.replyMessage(message, s)
@@ -181,7 +221,7 @@ async def showGroupSettings(message: GroupMessage):
 @command(name="#关键词屏蔽")
 @admin
 async def showGroupSettings(message: GroupMessage):
-    groupSettings = GroupConfig(config,message.group_id)
+    groupSettings = GroupConfig(message.group_id)
     if not groupSettings.getConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORD_MUTE.key]):
         groupSettings.setConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORD_MUTE.key], True)
         await reloadSettings(message)
@@ -192,10 +232,10 @@ async def showGroupSettings(message: GroupMessage):
         await messageUtils.replyMessage(message, "关键词屏蔽:关")
     return
 
+
 @command(name="#重载配置文件")
 @admin
 async def reloadSettings(message: GroupMessage):
-    config.load()
     sensitive_word.load()
 
 

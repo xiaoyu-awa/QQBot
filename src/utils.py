@@ -2,7 +2,7 @@ import datetime
 
 from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
-from ncatbot.core import GroupMessage, Image
+from ncatbot.core import GroupMessage
 
 from src import picHandle
 

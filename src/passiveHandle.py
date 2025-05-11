@@ -5,7 +5,7 @@ from typing import Dict, Tuple, Callable, List
 from ncatbot.core import GroupMessage
 
 from src import messageUtils, utils
-from .config.configUtils import config, sensitive_word
+from .config.configUtils import sensitive_word
 from .config.groupConfig import GroupConfig, GroupConfigItem
 
 
@@ -68,7 +68,7 @@ async def handle(message: GroupMessage):
 async def muteByKeyWord(message: GroupMessage):
     if await utils.isAdmin(message):
         return
-    groupSettings = GroupConfig(config,message.group_id)
+    groupSettings = GroupConfig(message.group_id)
     if not groupSettings.getConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORD_MUTE.key]):
         return False
     content = ""

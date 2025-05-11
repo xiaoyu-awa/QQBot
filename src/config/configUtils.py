@@ -80,5 +80,4 @@ class YAMLConfig:
             current = current[k]
         current[keys[-1]] = value
 
-config = YAMLConfig("config/config.yml")
 sensitive_word = YAMLConfig("config/sensitive_word.yml")

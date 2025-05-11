@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Any, Union
+from typing import Dict, Any
 
 from .configUtils import YAMLConfig
 
@@ -28,7 +28,7 @@ class UserConfig:
     }
 
     def __init__(self, user_id: str):
-        self.user_id = user_id
+        self.user_id = str(user_id)
         self.config_map = UserConfigItem.getConfigMap()
         self.config = YAMLConfig('config/userConfig.yml')
 
