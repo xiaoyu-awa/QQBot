@@ -1,12 +1,17 @@
 '679198724':
   randomPic: true
   keyWordMute: true
-  keyWords: ["[\\u1800-\\u18af]"]
+  keyWords:
+  - '[\u1800-\u18af]'
 '701892368':
   randomPic: false
   keyWordMute: true
   keyWords: []
 '981268335':
-  randomPic: false
+  randomPic: true
   keyWordMute: true
+  keyWords: []
+'583184896':
+  randomPic: false
+  keyWordMute: false
   keyWords: []

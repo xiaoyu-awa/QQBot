@@ -1,14 +1,14 @@
 from functools import wraps
 from typing import Dict, List, Tuple, Callable
 
-from ncatbot.core import GroupMessage
+from ncatbot.core import GroupMessage, MessageChain, Image
 
-from . import messageUtils, configUtils, groupConfig
+from . import messageUtils
 from . import picHandle
 from . import utils
-from .groupConfig import GroupConfig, ConfigItem
+from .config.groupConfig import GroupConfig, GroupConfigItem
 from .utils import isAdmin
-from .configUtils import config, sensitive_word
+from .config.configUtils import config, sensitive_word
 
 
 class Command:
@@ -102,7 +102,7 @@ async def getMCServerStatus(message: GroupMessage):
         else:
             players = ""
 
-        await messageUtils.replyLocalPicMessage(message, players, "pic/temp/mcServerInfo.png")
+        await messageUtils.sendLocalPicMessage(message, players, "pic/temp/mcServerInfo.png")
     return
 
 @command(name="#菜单")
@@ -112,11 +112,22 @@ async def menu(message: GroupMessage):
 
 @command(name="#随机图片")
 async def randomPic(message: GroupMessage):
-    groupSettings = GroupConfig(config,message.group_id)
-    if not groupSettings.getConfigByEnum(groupSettings.config_map[ConfigItem.RANDOMPIC.key]):
+    groupSettings = GroupConfig(config, message.group_id)
+    if not groupSettings.getConfigByEnum(groupSettings.config_map[GroupConfigItem.RANDOMPIC.key]):
         await messageUtils.sendMessage(message, "功能已禁用")
         return
-    await messageUtils.replyWebPicMessage(message, "", "https://www.loliapi.com/acg/index.php")
+    if len(message.raw_message.split()) == 1:
+        await messageUtils.sendWebPicMessage(message, "", "https://www.loliapi.com/acg/index.php")
+    if len(message.raw_message.split()) == 2:
+        if str(message.raw_message.split()[1]).isdigit():
+            msg = MessageChain([])
+            for i in range(max(1,min(int(message.raw_message.split()[1]), 5))):
+                msg+=Image("https://www.loliapi.com/acg/index.php")
+            await message.api.post_group_msg(group_id=message.group_id, rtf=msg)
+        else:
+            await messageUtils.sendMessage(message, "请输入正确的命令格式，例如：#随机图片 {数量(1-5)}")
+    else:
+        await messageUtils.sendMessage(message, "请输入正确的命令格式，例如：#随机图片 {数量}")
     return
 
 
@@ -171,12 +182,12 @@ async def showGroupSettings(message: GroupMessage):
 @admin
 async def showGroupSettings(message: GroupMessage):
     groupSettings = GroupConfig(config,message.group_id)
-    if not groupSettings.getConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key]):
-        groupSettings.setConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key], True)
+    if not groupSettings.getConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORD_MUTE.key]):
+        groupSettings.setConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORD_MUTE.key], True)
         await reloadSettings(message)
         await messageUtils.replyMessage(message, "关键词屏蔽:开")
     else:
-        groupSettings.setConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key], False)
+        groupSettings.setConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORD_MUTE.key], False)
         await reloadSettings(message)
         await messageUtils.replyMessage(message, "关键词屏蔽:关")
     return

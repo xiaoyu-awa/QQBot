@@ -5,8 +5,8 @@ from typing import Dict, Tuple, Callable, List
 from ncatbot.core import GroupMessage
 
 from src import messageUtils, utils
-from .configUtils import config, sensitive_word
-from .groupConfig import GroupConfig, ConfigItem
+from .config.configUtils import config, sensitive_word
+from .config.groupConfig import GroupConfig, GroupConfigItem
 
 
 class Command:
@@ -69,7 +69,7 @@ async def muteByKeyWord(message: GroupMessage):
     if await utils.isAdmin(message):
         return
     groupSettings = GroupConfig(config,message.group_id)
-    if not groupSettings.getConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORD_MUTE.key]):
+    if not groupSettings.getConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORD_MUTE.key]):
         return False
     content = ""
     for i in message.message:
@@ -78,7 +78,7 @@ async def muteByKeyWord(message: GroupMessage):
         else:
             content += i["data"]["text"]
     content = content.replace(" ", "")
-    for i in groupSettings.getConfigByEnum(groupSettings.config_map[ConfigItem.KEYWORDS.key]) + sensitive_word.get("sensitive", []):
+    for i in groupSettings.getConfigByEnum(groupSettings.config_map[GroupConfigItem.KEYWORDS.key]) + sensitive_word.get("sensitive", []):
         result_match = re.search(i,content)
         if result_match:
             await message.api.delete_msg(message.message_id)

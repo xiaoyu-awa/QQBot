@@ -12,7 +12,7 @@ async def sendMessage(message: GroupMessage, content):
     await changeGroupNick(message)
 
 
-async def replyLocalPicMessage(message, content, pic):
+async def sendLocalPicMessage(message, content, pic):
     msg = MessageChain([
         content,
         Image(pic)
@@ -21,7 +21,7 @@ async def replyLocalPicMessage(message, content, pic):
     await changeGroupNick(message)
 
 
-async def replyWebPicMessage(message, content, file_url):
+async def sendWebPicMessage(message, content, file_url):
     msg = MessageChain([
         content,
         Image(file_url)

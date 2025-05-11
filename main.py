@@ -1,5 +1,6 @@
 # ========= 导入必要模块 ==========
 from ncatbot.core import BotClient, GroupMessage, PrivateMessage
+from ncatbot.core.notice import NoticeMessage, RequestMessage
 from ncatbot.utils import get_log
 
 from src import commands, passiveHandle
@@ -26,12 +27,13 @@ async def on_private_message(msg: PrivateMessage):
     _log.info(msg)
 
 @bot.notice_event()
-async def on_notice(msg):
+async def on_notice(msg: NoticeMessage):
     _log.info(msg)
 
 @bot.request_event()
-async def on_request(msg):
+async def on_request(msg: RequestMessage):
     _log.info(msg)
+
 # ========== 启动 BotClient==========
 if __name__ == "__main__":
     bot.run(bt_uin="2630351717", root="2354934669", enable_webui_interaction=False)
