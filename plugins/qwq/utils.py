@@ -4,7 +4,7 @@ from mcstatus import JavaServer
 from mcstatus.status_response import JavaStatusResponse
 from ncatbot.core import GroupMessage, BotClient
 
-from src import picHandle
+from . import picHandle
 
 
 async def getMCServerStatus(mc_host, mc_port) -> JavaStatusResponse:
@@ -26,16 +26,6 @@ async def setGaoKao(message: GroupMessage):
     picHandle.getGaoKaoPic(days)
     await message.api.set_group_name(679198724, "高考倒计时: " + str(days) + "天")
     await message.api.set_group_portrait(679198724, "pic/temp/GaoKao.png")
-
-async def setGaoKaoWithBot(bot:BotClient):
-    date1 = datetime.date.today()
-    date2 = datetime.date(2025, 6, 7)
-    delta = date2 - date1
-    days = delta.days
-
-    picHandle.getGaoKaoPic(days)
-    await bot.api.set_group_name(679198724, "高考倒计时: " + str(days) + "天")
-    await bot.api.set_group_portrait(679198724, "pic/temp/GaoKao.png")
 
 
 async def isAdmin(message: GroupMessage):
