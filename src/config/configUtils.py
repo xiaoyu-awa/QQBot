@@ -1,9 +1,12 @@
-import yaml
 import os
+
+import yaml
+
 
 class YAMLConfigError(Exception):
     """自定义配置异常基类"""
     pass
+
 
 class YAMLConfig:
     def __init__(self, file_path):
@@ -79,5 +82,6 @@ class YAMLConfig:
                 current[k] = {}
             current = current[k]
         current[keys[-1]] = value
+
 
 sensitive_word = YAMLConfig("config/sensitive_word.yml")

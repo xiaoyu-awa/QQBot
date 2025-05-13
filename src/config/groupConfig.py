@@ -35,11 +35,10 @@ class GroupConfig:
         }
     }
 
-    def __init__(self, group_id : str):
+    def __init__(self, group_id: str):
         self.config = YAMLConfig('config/config.yml')
         self.config_map = GroupConfigItem.getConfigMap()
         self.group_id = str(group_id)
-
 
     def getConfigItem(self, enum_item: GroupConfigItem) -> Dict[str, Any]:
         """获取配置项的元信息"""

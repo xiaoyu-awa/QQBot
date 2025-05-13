@@ -7,10 +7,10 @@ from ncatbot.core import GroupMessage, MessageChain, Image
 from . import messageUtils
 from . import picHandle
 from . import utils
+from .config.configUtils import sensitive_word
 from .config.groupConfig import GroupConfig, GroupConfigItem
 from .config.userConfig import UserConfig, UserConfigItem
 from .utils import isAdmin
-from .config.configUtils import sensitive_word
 
 
 class Command:
@@ -115,7 +115,7 @@ async def signIn(message: GroupMessage):
 
 
 """
-小功能   画个分界线好看x=========================================================================================
+小功能 画个分界线好看x=========================================================================================
 """
 
 
