@@ -1,10 +1,11 @@
+import random
 import re
 from functools import wraps
 from typing import Dict, Tuple, Callable, List
 
 from ncatbot.core import GroupMessage
 
-from src import messageUtils, utils
+from . import messageUtils, utils
 from .config.configUtils import sensitive_word
 from .config.groupConfig import GroupConfig, GroupConfigItem
 
@@ -19,8 +20,6 @@ class Command:
     @classmethod
     def execute(cls, msg: GroupMessage):
         raise NotImplementedError
-
-
 class CommandSystem:
     @staticmethod
     def parse_input(msg: GroupMessage) -> Tuple[str, GroupMessage]:
@@ -70,11 +69,26 @@ async def handle(message: GroupMessage):
     if await muteByKeyWord(message):
         return True
 
+
+    await dice(message)
+
     passiveMsg, msg = CommandSystem.parse_input(message)
     await CommandSystem.handle_command(passiveMsg, msg)
 
     return False
 
+async def dice(message: GroupMessage):
+    if not message.raw_message.startswith("d") or message.raw_message.startswith("D"):
+        return
+    if len(message.message) != 1 or message.message[0]["type"] != "text":
+        return
+    s_num = message.raw_message[1:]
+    if s_num.isdigit():
+        num = int(s_num)
+    else:
+        return
+    random.randint(1, num)
+    await messageUtils.replyMessage(message, "投掷的骰子点数为:" + str(random.randint(1, num)))
 
 async def muteByKeyWord(message: GroupMessage):
     if await utils.isAdmin(message):
