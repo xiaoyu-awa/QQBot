@@ -11,6 +11,10 @@ async def sendMessage(message: GroupMessage, content):
     await message.api.post_group_msg(group_id=message.group_id, text=content)
     await changeGroupNick(message)
 
+async def sendRtfMessage(message: GroupMessage, rtf: MessageChain):
+    await message.api.post_group_msg(group_id=message.group_id, rtf=rtf)
+    await changeGroupNick(message)
+
 
 async def sendLocalPicMessage(message, content, pic):
     msg = MessageChain([

@@ -1,8 +1,10 @@
 import datetime
+import requests
+import json
 from functools import wraps
 from typing import Dict, List, Tuple, Callable
 
-from ncatbot.core import GroupMessage, MessageChain, Image
+from ncatbot.core import GroupMessage, MessageChain, Image, CustomMusic
 
 from . import messageUtils
 from . import picHandle
@@ -84,10 +86,10 @@ async def handle(message: GroupMessage):
 """
 
 
-@command(name="#菜单")
-async def menu(message: GroupMessage):
-    await messageUtils.replyMessage(message, "菜单:\n")
-    return
+# @command(name="#菜单")
+# async def menu(message: GroupMessage):
+#     await messageUtils.replyMessage(message, "菜单:\n")
+#     return
 
 
 @command(name="#签到")
@@ -118,6 +120,13 @@ async def signIn(message: GroupMessage):
 小功能 画个分界线好看x=========================================================================================
 """
 
+@command(name="#功能菜单")
+async def menu(message: GroupMessage):
+    await messageUtils.replyMessage(message, "功能菜单:\n" +
+                                             "#获取服务器状态 [host] {port}\n" +
+                                             "#随机图片 {数量(1-5)}\n" +
+                                             "#点歌 [歌名] [歌手名] [多关键词······]\n")
+    return
 
 @command(name="#获取服务器状态")
 async def getMCServerStatus(message: GroupMessage):
@@ -167,8 +176,29 @@ async def randomPic(message: GroupMessage):
         else:
             await messageUtils.sendMessage(message, "请输入正确的命令格式，例如：#随机图片 {数量(1-5)}")
     else:
-        await messageUtils.sendMessage(message, "请输入正确的命令格式，例如：#随机图片 {数量}")
+        await messageUtils.sendMessage(message, "请输入正确的命令格式，例如：#随机图片 {数量(1-5)}")
     return
+
+
+@command(name="#点歌")
+async def music(message: GroupMessage):
+    if len(message.raw_message.split()) == 1:
+        await messageUtils.replyMessage(message,
+                                        "请输入正确的命令格式，例如：#点歌 [歌名] [歌手名] [多关键词······]")
+        return
+    s = message.raw_message.split()
+    s.pop(0)
+    name = " ".join(s)
+    data = json.loads(requests.get('https://music-api.gdstudio.xyz/api.php?types=search&name=' + name).text)
+    url = json.loads(requests.get('https://music-api.gdstudio.xyz/api.php?types=url&id=' + str(data[0]["id"])).text)
+    pic = json.loads(requests.get('https://music-api.gdstudio.xyz/api.php?types=pic&id=' + str(data[0]["pic_id"])).text)
+    m_name = data[0]["name"]
+    m_url = "https://music-api.gdstudio.xyz/api.php?types=lyric&id=" + str(data[0]["id"])
+    m_audio = url["url"]
+    m_artist = '|'.join(data[0]["artist"])
+    m_pic = pic["url"]
+    msg = MessageChain([CustomMusic(url=m_audio,audio=m_audio,title=m_name,image=m_pic,singer=m_artist,type="163")])
+    await messageUtils.sendRtfMessage(message, msg)
 
 
 """
