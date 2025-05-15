@@ -114,13 +114,6 @@ async def muteByKeyWord(message: GroupMessage):
     return False
 
 
-@passive("叫妈妈")
-async def mom(message: GroupMessage):
-    if message.user_id == 3510936741:
-        await messageUtils.replyMessage(message, "妈妈")
-    return
-
-
 @passive("test")
 async def test(message: GroupMessage):
     if message.user_id == 2354934669:
